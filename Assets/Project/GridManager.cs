@@ -46,4 +46,26 @@ public class GridManager : MonoBehaviour
             
         }
     }
+
+    private void GetNeighbors(int row,int column)
+    {
+        int x = row;
+
+        for (int i = 0; i < 2; i++)
+        {
+            if (x+1<count)  
+            {
+                // x+1 komsu 
+                
+                // (x+1,
+            }
+
+            if (x-1>=0)
+            {
+                //x-1 komsu 
+            }
+
+            x = column;
+        }
+    }
 }
