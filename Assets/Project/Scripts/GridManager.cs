@@ -92,10 +92,7 @@ public class GridManager : MonoBehaviour
                {
                    isContain=true;
                }
-                /*if(activeList[i].Contains(a)&&activeList[i].Contains(b))
-                {
-                   isContain=true;
-                }*/
+               
 
            }
            if(isContain==false)
@@ -121,8 +118,11 @@ public class GridManager : MonoBehaviour
            foreach (var VARIABLE in killList)
            {
                VARIABLE.transform.GetChild(0).gameObject.SetActive(false);
-               
+               gridArray[(int)VARIABLE.matrix.x, (int)VARIABLE.matrix.y] = 0;
+
            }
+           killList.Clear();
+           
            
 
           //    print(activeList.Count);
