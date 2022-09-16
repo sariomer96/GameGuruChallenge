@@ -424,10 +424,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridObject: {fileID: 6389436421306799545, guid: 9e9b6a2b60653fc48a27b346d1b6cb8e, type: 3}
-  count: 3
+  count: 5
   a: 0
   b: 0
-  neighborsList: []
   killList: []
   elementList: []
 --- !u!4 &1231450804
