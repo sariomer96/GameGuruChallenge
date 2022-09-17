@@ -11,25 +11,45 @@ public class GridManager : MonoBehaviour
     public int count = 5;
     public int[,] gridArray;
     public int a, b;
- 
-    
-       public    List<Grid> killList = new List<Grid>();
+
+    private Camera _camera;
+      
+    public    List<Grid> killList = new List<Grid>();
     public List<Grid> elementList = new List<Grid>();
- 
- 
-         
+
+
+    void FindBound()
+    {
+        
+    }
     // Start is called before the axis frame update
     void Start()
     {
+        
+      _camera=Camera.main;
+      
         gridArray = new int[count, count];
+      
+    
+        /*Grid grid= Instantiate(gridObject,  Vector2.zero, quaternion.identity);
+        Camera.main.orthographicSize =  (float) (1*(((Screen.height) / (Screen.width * 0.5))));*/
         float posX = -2;
         float posY = 3;
+        float width;
+        float height;
+          
+
+      
+        
+       //  Camera.main.transform.position = new Vector3(grids.transform.position.x,grids.transform.position.y,Camera.main.transform.position.z);
         for (int i = 0; i < count; i++)
         {
             for (int j = 0; j < count; j++)
             {
                 gridArray[i, j] = 0;
+                
                Grid grid= Instantiate(gridObject, new Vector2(posX, posY), quaternion.identity);
+            
                elementList.Add(grid);
                grid.matrix.x = i;
                grid.matrix.y = j;
@@ -41,8 +61,8 @@ public class GridManager : MonoBehaviour
             posY-=2;
 
         }
-        
-    
+
+
     }
 
    Grid GetGridIndexes()
@@ -55,7 +75,7 @@ public class GridManager : MonoBehaviour
         if(hit.collider != null)
         {
            
-            Debug.Log ("Target Position: " + hit.collider.gameObject.transform.position+" "+ hit.collider.gameObject.name);
+        
             Grid grid = hit.transform.GetComponentInChildren<Grid>();
             grid.transform.GetChild(0).gameObject.SetActive(true);
             return grid;
@@ -148,6 +168,16 @@ public class GridManager : MonoBehaviour
         
     }
 
+    private bool IsItCorner(int matrixElement,int neighborIndex)
+    {
+        if (matrixElement+neighborIndex< 0  || matrixElement+neighborIndex>=count)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     private List<Grid> GetNeighbors(Grid selectedGrid)
     {
         List<Grid> neighborsList = new List<Grid>();
@@ -156,48 +186,29 @@ public class GridManager : MonoBehaviour
      
         int x =(int) selectedGrid.matrix.x;
         int y = (int)selectedGrid.matrix.y;
+
+        int[] neighborIndexList = { -1, 1 };
+
+
+        for (int neighIndex = 0; neighIndex < neighborIndexList.Length; neighIndex++)
+        {
+
+            if (!IsItCorner(x,neighborIndexList[neighIndex])&&  gridArray[x+neighborIndexList[neighIndex],y] == 1)
+            {
+                Grid grid= gridActive.Where(a => a.matrix == new Vector2(x+neighborIndexList[neighIndex],y)).Select(a => a).First();
+        
+                neighborsList.Add(grid);
+            }
+
+            if (!IsItCorner(y,neighborIndexList[neighIndex])&&  gridArray[x,y+neighborIndexList[neighIndex]] == 1)
+            {
+                Grid grid= gridActive.Where(a => a.matrix == new Vector2(x,y+neighborIndexList[neighIndex])).Select(a => a).First();
+        
+                neighborsList.Add(grid);
+            }
+        }
+    
    
-    
-
-    
-        // x axis
-        if (x+1 < count && gridArray[x+1,y] == 1)
-        {
-            // print(x+","+(y+1)+count);
-        
-            Grid grid= gridActive.Where(a => a.matrix == new Vector2(x+1,y)).Select(a => a).First();
-        
-            neighborsList.Add(grid);
-        }
-
-        if (x-1 >= 0 && gridArray[x-1,y] == 1)
-        {
-            // print(x+","+(y+1)+count);
-        
-            Grid grid= gridActive.Where(a => a.matrix == new Vector2(x-1,y)).Select(a => a).First();
-        
-            neighborsList.Add(grid);
-        }
-
-
-        // y axis
-        if (y+1 < count && gridArray[x,y+1] == 1)
-        {
-            // print(x+","+(y+1)+count);
-        
-            Grid grid= gridActive.Where(a => a.matrix == new Vector2(x,y+1)).Select(a => a).First();
-        
-            neighborsList.Add(grid);
-        }
-
-        if (y-1 >= 0 && gridArray[x,y-1] == 1)
-        {
-            // print(x+","+(y+1)+count);
-        
-            Grid grid= gridActive.Where(a => a.matrix == new Vector2(x,y-1)).Select(a => a).First();
-        
-            neighborsList.Add(grid);
-        }
 
         return neighborsList;
     }
