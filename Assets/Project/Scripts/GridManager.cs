@@ -7,60 +7,131 @@ using UnityEngine;
 
 public class GridManager : MonoBehaviour
 {
+
+    public float inputSize;
+    public float gridSize;
+    public float padding;
     public Grid gridObject;
     public int count = 5;
     public int[,] gridArray;
     public int a, b;
 
     private Camera _camera;
-      
+    private Vector2 screenBounds;
     public    List<Grid> killList = new List<Grid>();
     public List<Grid> elementList = new List<Grid>();
+    private float tmpPosX, tmpPosY;
 
-
-    void FindBound()
+    void SetGridSize(float rangeX,float rangeY)
     {
+        float range;
+        if (rangeX >= rangeY)
+        {
+            range = rangeY;
+            
+        }
+        else
+            range = rangeX;
+
+        gridSize = (range / ((2 * count) + (count + 1)))*2;
+        padding = gridSize/2 ;
         
+        gridObject.transform.localScale =new Vector3( gridSize,gridSize,gridSize);
     }
+
+   Vector2 GetStartCoordinate(float rangeX,float rangeY)
+    {
+        float range;
+        if (rangeX >= rangeY)
+        {
+            range = rangeY;
+            
+        }
+        else
+            range = rangeX;
+
+        float halfRange = range / 2;
+        float startPosX = -halfRange + padding*2;             // 
+        float startPosY = halfRange - padding * 2;
+        
+        
+        return new Vector2(startPosX,startPosY);
+    }
+    
     // Start is called before the axis frame update
     void Start()
     {
         
+    
       _camera=Camera.main;
+     
       
         gridArray = new int[count, count];
+         
+        
+        screenBounds = _camera.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, _camera.transform.position.z));
+       
+
+        SpriteRenderer renderer= gridObject.transform.GetComponentInChildren<SpriteRenderer>();
+
+
+     
+      //  Instantiate(gridObject, new Vector3(screenBounds.x-(renderer.bounds.size.x/2),screenBounds.y-(renderer.bounds.size.y/2)), quaternion.identity); 
+        
+       
+        float rangeX = Mathf.Abs(screenBounds.x*2);
+        float rangeY = Mathf.Abs(screenBounds.y * 2)-inputSize;
       
-    
-        /*Grid grid= Instantiate(gridObject,  Vector2.zero, quaternion.identity);
-        Camera.main.orthographicSize =  (float) (1*(((Screen.height) / (Screen.width * 0.5))));*/
-        float posX = -2;
-        float posY = 3;
-        float width;
-        float height;
-          
+        
+        SetGridSize(rangeX,rangeY);
+
+
+
+
+
+
+        Vector2 startPos;
+          startPos = GetStartCoordinate(rangeX, rangeY);
+       
+        tmpPosX = startPos.x;
+       
+ 
+        tmpPosY = startPos.y;
+       
+     
+     
+     
 
       
         
        //  Camera.main.transform.position = new Vector3(grids.transform.position.x,grids.transform.position.y,Camera.main.transform.position.z);
         for (int i = 0; i < count; i++)
-        {
+        {   
             for (int j = 0; j < count; j++)
             {
+            
                 gridArray[i, j] = 0;
                 
-               Grid grid= Instantiate(gridObject, new Vector2(posX, posY), quaternion.identity);
-            
+               Grid grid= Instantiate(gridObject, new Vector2(tmpPosX, tmpPosY), quaternion.identity);
+   
                elementList.Add(grid);
                grid.matrix.x = i;
                grid.matrix.y = j;
-           
-                posX+=2;
+
+               tmpPosX += gridSize+padding;
+               // newPosX += range;
+              
             }
 
-            posX = -2;
-            posY-=2;
+            tmpPosY -= gridSize+padding;
+            tmpPosX = startPos.x;
+            /*newPosX = startPosX;
+            newPosY -= range;*/
+            /*posX = -2;
+            posY-=2;*/
 
         }
+   
 
 
     }
@@ -154,7 +225,7 @@ public class GridManager : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             Grid grid = GetGridIndexes();
-
+       
            if (grid==null)  // !=null
               return;
                
