@@ -22,17 +22,23 @@ public class GridManager : MonoBehaviour
     public List<Grid> elementList = new List<Grid>();
     private float tmpPosX, tmpPosY;
 
-    void SetGridSize(float rangeX,float rangeY)
+
+    float GetRangeForFitScreen( float rangeX,float rangeY)
     {
         float range;
+       
         if (rangeX >= rangeY)
-        {
             range = rangeY;
-            
-        }
         else
             range = rangeX;
 
+        return range;
+
+    }
+    void SetGridSize(float rangeX,float rangeY)
+    {
+        float range=GetRangeForFitScreen(rangeX,rangeY);
+        
         gridSize = (range / ((2 * count) + (count + 1)))*2;
         padding = gridSize/2 ;
         
@@ -41,17 +47,10 @@ public class GridManager : MonoBehaviour
 
    Vector2 GetStartCoordinate(float rangeX,float rangeY)
     {
-        float range;
-        if (rangeX >= rangeY)
-        {
-            range = rangeY;
-            
-        }
-        else
-            range = rangeX;
+        float range=GetRangeForFitScreen(rangeX,rangeY);
 
         float halfRange = range / 2;
-        float startPosX = -halfRange + padding*2;             // 
+        float startPosX = -halfRange + padding*2;             
         float startPosY = halfRange - padding * 2;
         
         
@@ -61,96 +60,63 @@ public class GridManager : MonoBehaviour
     // Start is called before the axis frame update
     void Start()
     {
-        
-    
-      _camera=Camera.main;
+        _camera=Camera.main;
      
-      
         gridArray = new int[count, count];
          
-        
         screenBounds = _camera.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, _camera.transform.position.z));
        
-
         SpriteRenderer renderer= gridObject.transform.GetComponentInChildren<SpriteRenderer>();
 
-
-     
-      //  Instantiate(gridObject, new Vector3(screenBounds.x-(renderer.bounds.size.x/2),screenBounds.y-(renderer.bounds.size.y/2)), quaternion.identity); 
-        
-       
         float rangeX = Mathf.Abs(screenBounds.x*2);
         float rangeY = Mathf.Abs(screenBounds.y * 2)-inputSize;
       
-        
         SetGridSize(rangeX,rangeY);
 
-
-
-
-
-
-        Vector2 startPos;
-          startPos = GetStartCoordinate(rangeX, rangeY);
+        Vector2 startPos; 
+        startPos = GetStartCoordinate(rangeX, rangeY);
        
         tmpPosX = startPos.x;
-       
- 
         tmpPosY = startPos.y;
-       
-     
-     
-     
-
-      
+       CreateMatrix(startPos.x);
         
-       //  Camera.main.transform.position = new Vector3(grids.transform.position.x,grids.transform.position.y,Camera.main.transform.position.z);
+
+    }
+
+    void CreateMatrix(float startPos_x)
+    {
         for (int i = 0; i < count; i++)
         {   
             for (int j = 0; j < count; j++)
             {
-            
                 gridArray[i, j] = 0;
                 
-               Grid grid= Instantiate(gridObject, new Vector2(tmpPosX, tmpPosY), quaternion.identity);
+                Grid grid= Instantiate(gridObject, new Vector2(tmpPosX, tmpPosY), quaternion.identity);
    
-               elementList.Add(grid);
-               grid.matrix.x = i;
-               grid.matrix.y = j;
+                elementList.Add(grid);
+                grid.matrix.x = i;
+                grid.matrix.y = j;
 
-               tmpPosX += gridSize+padding;
-               // newPosX += range;
-              
+                tmpPosX += gridSize+padding;
+
             }
 
             tmpPosY -= gridSize+padding;
-            tmpPosX = startPos.x;
-            /*newPosX = startPosX;
-            newPosY -= range;*/
-            /*posX = -2;
-            posY-=2;*/
+            tmpPosX =startPos_x;
 
         }
-   
-
-
     }
-
-   Grid GetGridIndexes()
+         
+   Grid GetGrid()
     {
         RaycastHit2D hit;
-         hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero,LayerMask.GetMask("Grid"));
+        hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero,LayerMask.GetMask("Grid"));
 
-      
-             
         if(hit.collider != null)
         {
-           
-        
             Grid grid = hit.transform.GetComponentInChildren<Grid>();
             grid.transform.GetChild(0).gameObject.SetActive(true);
             return grid;
-
         }
 
         return null;
@@ -201,7 +167,7 @@ public class GridManager : MonoBehaviour
           grid.transform.GetChild(0).transform.gameObject.SetActive(false);
 
   }
-  void AddKillList()
+  void CreateKillList()
   {
 
     List<Grid> grids =GetActiveList();
@@ -224,14 +190,14 @@ public class GridManager : MonoBehaviour
        
         if (Input.GetMouseButtonDown(0))
         {
-            Grid grid = GetGridIndexes();
+            Grid grid = GetGrid();
        
            if (grid==null)  // !=null
               return;
                
            ActivateGrid(grid);
            
-          AddKillList();
+          CreateKillList();
           RemoveItems();
 
         }
@@ -261,19 +227,19 @@ public class GridManager : MonoBehaviour
         int[] neighborIndexList = { -1, 1 };
 
 
-        for (int neighIndex = 0; neighIndex < neighborIndexList.Length; neighIndex++)
+        for (int i = 0; i < neighborIndexList.Length; i++)
         {
 
-            if (!IsItCorner(x,neighborIndexList[neighIndex])&&  gridArray[x+neighborIndexList[neighIndex],y] == 1)
+            if (!IsItCorner(x,neighborIndexList[i]) &&  gridArray[x+neighborIndexList[i],y] == 1)
             {
-                Grid grid= gridActive.Where(a => a.matrix == new Vector2(x+neighborIndexList[neighIndex],y)).Select(a => a).First();
+                Grid grid= gridActive.Where(a => a.matrix == new Vector2(x+neighborIndexList[i],y)).Select(a => a).First();
         
                 neighborsList.Add(grid);
             }
 
-            if (!IsItCorner(y,neighborIndexList[neighIndex])&&  gridArray[x,y+neighborIndexList[neighIndex]] == 1)
+            if (!IsItCorner(y,neighborIndexList[i]) &&  gridArray[x,y+neighborIndexList[i]] == 1)
             {
-                Grid grid= gridActive.Where(a => a.matrix == new Vector2(x,y+neighborIndexList[neighIndex])).Select(a => a).First();
+                Grid grid= gridActive.Where(a => a.matrix == new Vector2(x,y+neighborIndexList[i])).Select(a => a).First();
         
                 neighborsList.Add(grid);
             }

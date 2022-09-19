@@ -651,7 +651,7 @@ MonoBehaviour:
   gridSize: 0
   padding: 0
   gridObject: {fileID: 6389436421306799545, guid: 9e9b6a2b60653fc48a27b346d1b6cb8e, type: 3}
-  count: 105
+  count: 10
   a: 0
   b: 0
   killList: []
